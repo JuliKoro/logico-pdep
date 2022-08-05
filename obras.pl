@@ -1,10 +1,4 @@
-/* Tarea (13/06/22):
-Sobre la base de conocimientos de la clase queremos saber:
- - si una obra le gusta a Gus si es Sandman o la escribió Isaac Asimov. Tiene que ser inversible;
- - si conviene contratar un artista si escribió un bestseller o es reincidente. Tiene que ser inversible.
- - si una obra es rioplatense, que es cuando la nacionalidad de su artista es platense (Uruguay o Argentina).
-¡Ojo con repetir lógica!
-*/
+% Tarea (13/06/22):
 
 % BASE DE CONOCIMIENTOS
 
@@ -56,7 +50,7 @@ esArtistaDelNovenoArte(Artista) :- % Regla (por comprension)
 
 esArtistaDelNovenoArte(artSpiegelman). % hecho
 
-% copiasVendidas(Obra,Cantidad)
+% copiasVendidas(Obra,Cantidad).
 copiasVendidas(socorro, 10000).
 copiasVendidas(sandman, 20000).
 copiasVendidas(watchmen, 30000).
@@ -82,3 +76,35 @@ copiasVendidas(ficciones, 20000).
 copiasVendidas(elAleph, 30000).
 copiasVendidas(cuentosDeLaSelva, 40000).
 copiasVendidas(cuentosDeLocuraAmorYMuerte, 50000).
+
+
+% Una obra es un bestseller si vendió más de 50mil copias.
+
+esBestSeller(Obra) :-
+    copiasVendidas(Obra, Cantidad),
+    Cantidad > 50000.               % Condición
+
+% Un artista es reincidente si escribió al menos 2 obras.
+
+esReincidente(Artista):-
+    escribio(Artista, Obra1),
+    escribio(Artista, Obra2),
+    Obra1 \= Obra2. % Para que cuente dos Obras distintas
+
+% Una obra es un libro cuando NO es un comic.
+
+esLibro(Obra):-
+    esObra(Obra), % generador para que esLibro sea inversible
+    not(esComic(Obra)). % negación
+
+esObra(Obra):- % es una Obra si fué escrita por alguien (_)
+    escribio(_, Obra).
+
+/*¡not no es inversible! No puede ligar las variables dentro de su predicado.
+% Si a esLibro no le agregamos el generador, no sería un predicado inversible porque el not no es inversible.
+% El generador nos "achica" el universo de opciones. */
+
+% Tarea: Una obra le gusta a Gus si es Sandman o la escribió Isaac Asimov. Tiene que ser inversible.
+% Tarea: Conviene contratar un artista si escribió un bestseller o es reincidente. Tiene que ser inversible.
+% Tarea: Queremos saber si una obra es rioplatense, que es cuando la nacionalidad de su artista es platense (Uruguay o Argentina). ¡Ojo con repetir lógica! 
+    
