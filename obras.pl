@@ -1,4 +1,4 @@
-% Tarea (Clases 10 y 11):
+% Tarea (Clases 10, 11 y 12):
 
 % BASE DE CONOCIMIENTOS
 
@@ -210,3 +210,88 @@ cumpleCon(cientifico(fisicaCuantica)).
 
 cumpleCon(bestSeller(Precio, CantidadDePaginas)):-
     Precio / CantidadDePaginas < 50.
+
+% is -> predicado que relaciona un resultado con su cuenta artmética
+% Resultado is ExpresionMatematica
+
+/* cantidadDePaginas/2 relaciona a una obra con su cantidad de páginas:
+- las novelas tienen 20 páginas por capítulo;
+- los libros de cuentos 5 páginas por cuento;
+- las obras científicas tienen siempre 1000 páginas;
+- de los best sellers ya sabemos su cantidad de páginas.
+*/
+
+cantidadDePaginas(Obra, CantidadDePaginas) :- 
+	esDeTipo(Obra, Tipo),
+	paginasPorTipo(Tipo, CantidadDePaginas).
+
+paginasPorTipo(novela(_, CantidadDeCapitulos), CantidadDePaginas):-
+	CantidadDePaginas is CantidadDeCapitulos * 20.
+
+paginasPorTipo(libroDeCuentos(CantidadDeCuentos), CantidadDePaginas):-
+	CantidadDePaginas is CantidadDeCuentos * 5.
+
+paginasPorTipo(cientifico(_), 1000).
+
+paginasPorTipo(bestSeller(_, CantidadDePaginas), CantidadDePaginas).
+
+% Queremos saber el puntaje de un autor, este se calcula como: 3 * cantidad de obras best seller que escribió.
+
+escribioBestSeller(Artista, Obra):- % Predicado que nos dice las obras que escribió un autos que son bestsellers
+    escribio(Artista, Obra),
+    esBestSeller(Obra).
+
+% findall(Formato, Consulta, Lista). -> inversible para el argumento de Lista
+
+obrasBestSellerQueEscribio(Autor, Obras):- % Relaciona a un autor con todas las obras que escribió y que ademas son bestsellers
+    escribio(Autor, _),
+    findall(Obra, escribioBestSeller(Autor, Obra), Obras). % generams una lista (Obras) con elementos de Obra que cumlpa con la Conuslta
+
+% length(Lista, Tamanio). -> inversible para el argumento de Tamaño
+
+cantidadDeObrasBestSeller(Artista, Cantidad):- % Responde con la cantidad de Obras bestselers de un Artista
+    obrasBestSellerQueEscribio(Artista, UnasObras),
+    length(UnasObras, Cantidad).
+
+puntaje(Artista, Puntaje):-
+    cantidadDeObrasBestSeller(Artista, Cantidad),
+    Puntaje is 3 * Cantidad.
+
+% Además de best sellers queremos que también le gusten a Gus:
+
+obrasBestSellerQueEscribioQueLeGustanAGus(Artista, Obras):-
+    escribio(Artista, _),
+    findall(Obra, esBestSellerDelGustoDeGus(Artista, Obra), Obras). % No pueden haber consultas compuesas en el findall (- decalrativo)
+
+esBestSellerDelGustoDeGus(Artista, Obra):- % Delegamos
+	escribioBestSeller(Artista, Obra), 
+	leGustaAGus(Obra).
+
+% Vamos a introducir las obras fantásticas, las cuáles cuentan con un conjunto de elementos mágicos:
+
+%fantastica(ElementosMágicos)
+esDeTipo(sandman, fantastica([yelmo, bolsaDeArena, rubi])). % utilizamos listas con individuos dentro de nuestro modelado
+
+% Vamos a agregar un nuevo tipo copado para las obras fantásticas: aquellas obras que tengan un rubí.
+
+% member(Elemento, Lista)
+
+cumpleCon(fantastica(ElementosMagicos)):-
+    member(rubi, ElementosMagicos). % Consulta si el elemento rubi esta en la lista ElementosMagicos
+
+% ¡NO se utiliza el member con listas generadas con findall! -> Usar la consulta en esos casos (+ declarativo)
+
+% Queremos saber el promedio de copias que vendió un autor en toda su vida.
+
+vendio(Artista, Copias):- % relaciona un autor con cada cantidad de copias vendida por obra
+    escribio(Artista, Obra),
+    copiasVendidas(Obra, Copias).
+
+% sum_list(ListaNumeros, SumaTotal).
+
+promedioCopiasVendidas(Artista, Promedio):-
+    escribio(Artista, _), % genero el Autor para recorrer todas sus Obras
+    findall(Copias, vendio(Artista, Copias), ListaCopias), % genero una lista con las copias vendidas de cada Obra
+    sum_list(ListaCopias, TotalCopias), % hago la suma total de la lista con las copias vendidas
+    length(ListaCopias, Cantidad), % Cantidad de obras del Artista
+    Promedio is TotalCopias/Cantidad. % calculo el Promedio
